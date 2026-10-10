@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://tbdnfhoswqyvodgwxncu.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_3mAdpUJMAjE3hkUM8H1sUQ_7TMWpYGH";
 const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const app = document.querySelector("#app");
 
