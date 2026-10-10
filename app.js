@@ -404,7 +404,7 @@ function renderAttendance() {
             <div><strong>${escapeHtml(item.name)}</strong><div class="task-detail">${(item.days_of_week || []).map(n => weekdays.find(d => d.n === n)?.short).filter(Boolean).join(", ") || "Schedule not set"} ${item.start_time ? `· ${escapeHtml(item.start_time.slice(0, 5))}` : ""}</div>
             ${session ? `<div class="task-badges">${badge(session.status, session.status === "Present" ? "present" : session.status === "Late" ? "late" : "")}</div>` : ""}</div>
             <div class="attendance-actions">
-              ${["Present", "Absent", "Late", "Excused"].map(status => `<button class="button ${status === "Present" ? "" : "ghost"} small" data-action="attendance" data-class="${item.id}" data-status="${status}">${status}</button>`).join("")}
+              ${["Present", "Absent", "Late", "Excused", "Cancelled"].map(status => `<button class="button ${status === "Present" ? "" : "ghost"} small" data-action="attendance" data-class="${item.id}" data-status="${status}">${status}</button>`).join("")}
               <button class="icon-button" data-action="delete-class" data-id="${item.id}" title="Remove class">×</button>
             </div>
           </div>`;
