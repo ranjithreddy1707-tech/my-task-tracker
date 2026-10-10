@@ -3,29 +3,345 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f2">
   <title>My Task Tracker</title>
   <style>
+    :root {
+      color-scheme: light;
+      --ink: #20251f;
+      --muted: #788078;
+      --line: #e7e9e3;
+      --paper: #fff;
+      --bg: #f5f6f2;
+      --green: #416a4a;
+      --green-light: #e8f0e8;
+      --orange: #bb6b3c;
+      --shadow: 0 12px 36px #1f2c1f0a;
+    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 2rem;
-      font-family: Arial, sans-serif;
-      background: #f4f6fb;
-      color: #202536;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     }
-
-    main {
-      max-width: 800px;
-      margin: 3rem auto;
-      padding: 2rem;
-      background: white;
-      border-radius: 16px;
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.03em; }
+    .mark {
+      width: 38px; height: 38px; border-radius: 13px; display: grid; place-items: center;
+      color: white; background: var(--green); font-size: 20px;
+    }
+    .eyebrow { color: var(--green); text-transform: uppercase; font-size: 11px; letter-spacing: .12em; font-weight: 750; }
+    h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -.055em; margin: 8px 0; }
+    h2 { margin: 0; font-size: 19px; letter-spacing: -.03em; }
+    p { color: var(--muted); }
+    .topline { display: flex; align-items: center; gap: 12px; }
+    .user-email { color: var(--muted); font-size: 13px; }
+    .intro { padding: 34px 0 26px; }
+    .intro p { margin: 8px 0 0; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 8px 0 22px; }
+    .stat, .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+    .stat { padding: 18px 20px; }
+    .stat-label { color: var(--muted); font-size: 13px; }
+    .stat-value { font-size: 28px; font-weight: 750; letter-spacing: -.05em; margin-top: 8px; }
+    .layout { display: grid; grid-template-columns: 340px 1fr; gap: 18px; align-items: start; padding-bottom: 50px; }
+    .panel { padding: 22px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 18px; }
+    label { display: block; font-size: 12px; font-weight: 700; margin: 14px 0 6px; }
+    input, select, textarea {
+      width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px;
+      color: var(--ink); background: #fff; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #8aa58e; box-shadow: 0 0 0 3px #416a4a18; }
+    textarea { resize: vertical; min-height: 78px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn {
+      border: 0; border-radius: 10px; padding: 11px 15px; background: var(--green);
+      color: white; font-weight: 700;
+    }
+    .btn:hover { filter: brightness(.95); }
+    .btn.full { width: 100%; margin-top: 18px; }
+    .btn.secondary { background: var(--green-light); color: var(--green); }
+    .btn.ghost { background: transparent; color: var(--muted); padding: 8px 10px; }
+    .toolbar { display: flex; gap: 10px; margin-bottom: 14px; }
+    .toolbar input { flex: 1; }
+    .toolbar select { width: 160px; }
+    .task-list { display: grid; gap: 10px; }
+    .task {
+      border: 1px solid var(--line); border-radius: 14px; padding: 15px;
+      display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center;
+    }
+    .task-title { font-weight: 700; overflow-wrap: anywhere; }
+    .task-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+    .pill { font-size: 11px; border-radius: 99px; padding: 5px 9px; background: #f0f2ed; color: #626b61; }
+    .pill.high { background: #fae9e1; color: #a34e2b; }
+    .pill.done { background: var(--green-light); color: var(--green); }
+    .pill.late { background: #fff0df; color: #9d5a17; }
+    .task-note { font-size: 13px; color: var(--muted); margin: 8px 0 0; overflow-wrap: anywhere; }
+    .actions { display: flex; gap: 6px; }
+    .icon-btn {
+      border: 1px solid var(--line); color: var(--muted); background: white;
+      width: 34px; height: 34px; border-radius: 9px;
+    }
+    .icon-btn:hover { color: var(--ink); background: var(--bg); }
+    .empty { border: 1px dashed #d8ddd5; border-radius: 14px; padding: 32px 16px; text-align: center; color: var(--muted); }
+    .auth-card { max-width: 420px; margin: 70px auto; }
+    .auth-card p { line-height: 1.5; }
+    .auth-switch { text-align: center; font-size: 13px; }
+    .link-btn { background: none; border: 0; padding: 0; color: var(--green); font-weight: 700; }
+    .notice { display: none; padding: 10px 12px; border-radius: 10px; margin-top: 12px; font-size: 13px; }
+    .notice.show { display: block; }
+    .notice.error { background: #fff0ed; color: #9f3d2e; }
+    .notice.info { background: var(--green-light); color: var(--green); }
+    @media (max-width: 760px) {
+      .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .layout { grid-template-columns: 1fr; }
+      .intro { padding-top: 22px; }
+      .panel { padding: 17px; }
+    }
+    @media (max-width: 440px) {
+      .wrap { width: min(100% - 22px, 1120px); }
+      header { padding: 16px 0; }
+      .user-email { display: none; }
+      .toolbar { flex-direction: column; }
+      .toolbar select { width: 100%; }
+      .task { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-end; }
     }
   </style>
 </head>
 <body>
-  <main>
-    <h1>My Task Tracker</h1>
-    <p>Your custom tracker will take shape here.</p>
-  </main>
+  <div class="wrap">
+    <header>
+      <div class="brand"><span class="mark">✓</span><span>My Task Tracker</span></div>
+      <div class="topline" id="topline"></div>
+    </header>
+    <main id="app"></main>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://tbdnfhoswqyvodgwxncu.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_3mAdpUJMAjE3hkUM8H1sUQ_7TMWpYGH";
+    const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+    const app = document.querySelector("#app");
+    const topline = document.querySelector("#topline");
+    let tasks = [];
+    let filter = "All";
+    let query = "";
+    let authMode = "signin";
+
+    const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[ch]));
+    const today = () => new Date().toLocaleDateString("en-CA");
+    const notify = (message, type = "info") => {
+      const box = document.querySelector("#notice");
+      if (!box) return;
+      box.textContent = message;
+      box.className = `notice show ${type}`;
+    };
+
+    function showAuth() {
+      topline.innerHTML = "";
+      app.innerHTML = `
+        <section class="panel auth-card">
+          <div class="eyebrow">Your personal workspace</div>
+          <h1 style="font-size:32px">Plan your day.</h1>
+          <p>Sign in on your laptop or phone to see the same saved tasks.</p>
+          <form id="auth-form">
+            <label for="email">Email</label>
+            <input id="email" type="email" autocomplete="email" required>
+            <label for="password">Password</label>
+            <input id="password" type="password" minlength="6" autocomplete="${authMode === "signup" ? "new-password" : "current-password"}" required>
+            <button class="btn full" type="submit">${authMode === "signup" ? "Create account" : "Sign in"}</button>
+          </form>
+          <div class="notice" id="notice"></div>
+          <p class="auth-switch">
+            ${authMode === "signup" ? "Already have an account?" : "New here?"}
+            <button class="link-btn" id="toggle-auth">${authMode === "signup" ? "Sign in" : "Create an account"}</button>
+          </p>
+        </section>`;
+      document.querySelector("#toggle-auth").onclick = () => {
+        authMode = authMode === "signup" ? "signin" : "signup";
+        showAuth();
+      };
+      document.querySelector("#auth-form").onsubmit = async event => {
+        event.preventDefault();
+        const email = document.querySelector("#email").value.trim();
+        const password = document.querySelector("#password").value;
+        const button = event.currentTarget.querySelector("button");
+        button.disabled = true;
+        button.textContent = "Please wait…";
+        const result = authMode === "signup"
+          ? await db.auth.signUp({ email, password })
+          : await db.auth.signInWithPassword({ email, password });
+        button.disabled = false;
+        button.textContent = authMode === "signup" ? "Create account" : "Sign in";
+        if (result.error) return notify(result.error.message, "error");
+        if (authMode === "signup" && !result.data.session) {
+          notify("Check your email for a confirmation link, then return here to sign in.");
+          return;
+        }
+        await loadTasks();
+      };
+    }
+
+    function render() {
+      const active = tasks.filter(task => task.status !== "Done").length;
+      const completed = tasks.filter(task => task.status === "Done").length;
+      const overdue = tasks.filter(task => task.status !== "Done" && task.due_date && task.due_date < today()).length;
+      const visible = tasks.filter(task => {
+        const matchesFilter = filter === "All" || task.status === filter;
+        const text = `${task.task} ${task.category ?? ""} ${task.notes ?? ""}`.toLowerCase();
+        return matchesFilter && text.includes(query.toLowerCase());
+      });
+
+      topline.innerHTML = `<span class="user-email">${esc(window.userEmail || "")}</span><button class="btn secondary" id="signout">Sign out</button>`;
+      app.innerHTML = `
+        <section class="intro">
+          <div class="eyebrow">A little progress, every day</div>
+          <h1>Your tasks, your way.</h1>
+          <p>Add your work, keep priorities clear, and see what needs attention.</p>
+        </section>
+        <section class="stats">
+          <div class="stat"><div class="stat-label">All tasks</div><div class="stat-value">${tasks.length}</div></div>
+          <div class="stat"><div class="stat-label">In progress</div><div class="stat-value">${active}</div></div>
+          <div class="stat"><div class="stat-label">Completed</div><div class="stat-value">${completed}</div></div>
+          <div class="stat"><div class="stat-label">Overdue</div><div class="stat-value">${overdue}</div></div>
+        </section>
+        <section class="layout">
+          <form class="panel" id="task-form">
+            <div class="panel-head"><h2>Add a task</h2></div>
+            <label for="task">Task name</label>
+            <input id="task" maxlength="180" placeholder="What needs doing?" required>
+            <div class="row">
+              <div><label for="priority">Priority</label>
+                <select id="priority"><option>Medium</option><option>High</option><option>Low</option></select></div>
+              <div><label for="status">Status</label>
+                <select id="status"><option>Not started</option><option>In progress</option><option>Done</option></select></div>
+            </div>
+            <div class="row">
+              <div><label for="due_date">Due date</label><input id="due_date" type="date"></div>
+              <div><label for="category">Category</label><input id="category" maxlength="60" placeholder="Personal, work…"></div>
+            </div>
+            <label for="notes">Notes</label>
+            <textarea id="notes" maxlength="1000" placeholder="Optional details"></textarea>
+            <button class="btn full" type="submit">Add task</button>
+            <div class="notice" id="notice"></div>
+          </form>
+          <section class="panel">
+            <div class="panel-head"><h2>Your list</h2><span class="eyebrow">${visible.length} shown</span></div>
+            <div class="toolbar">
+              <input id="search" placeholder="Search tasks…" value="${esc(query)}">
+              <select id="filter">
+                ${["All", "Not started", "In progress", "Done"].map(item => `<option ${filter === item ? "selected" : ""}>${item}</option>`).join("")}
+              </select>
+            </div>
+            <div class="task-list">
+              ${visible.length ? visible.map(task => {
+                const late = task.status !== "Done" && task.due_date && task.due_date < today();
+                return `<article class="task">
+                  <div>
+                    <div class="task-title">${esc(task.task)}</div>
+                    <div class="task-meta">
+                      <span class="pill ${task.priority === "High" ? "high" : ""}">${esc(task.priority)} priority</span>
+                      <span class="pill ${task.status === "Done" ? "done" : ""}">${esc(task.status)}</span>
+                      ${task.category ? `<span class="pill">${esc(task.category)}</span>` : ""}
+                      ${task.due_date ? `<span class="pill ${late ? "late" : ""}">${late ? "Overdue · " : "Due · "}${esc(task.due_date)}</span>` : ""}
+                    </div>
+                    ${task.notes ? `<p class="task-note">${esc(task.notes)}</p>` : ""}
+                  </div>
+                  <div class="actions">
+                    <button class="icon-btn" data-action="toggle" data-id="${task.id}" title="Change status" aria-label="Change status">${task.status === "Done" ? "↶" : "✓"}</button>
+                    <button class="icon-btn" data-action="delete" data-id="${task.id}" title="Delete task" aria-label="Delete task">×</button>
+                  </div>
+                </article>`;
+              }).join("") : `<div class="empty">No tasks match this view yet.</div>`}
+            </div>
+          </section>
+        </section>`;
+
+      document.querySelector("#signout").onclick = async () => {
+        await db.auth.signOut();
+        tasks = [];
+        showAuth();
+      };
+      document.querySelector("#search").oninput = event => {
+        query = event.target.value;
+        render();
+        const input = document.querySelector("#search");
+        input.focus();
+        input.setSelectionRange(query.length, query.length);
+      };
+      document.querySelector("#filter").onchange = event => { filter = event.target.value; render(); };
+      document.querySelector("#task-form").onsubmit = addTask;
+      document.querySelector(".task-list").onclick = handleTaskAction;
+    }
+
+    async function loadTasks() {
+      const { data: { user } } = await db.auth.getUser();
+      if (!user) return showAuth();
+      window.userEmail = user.email;
+      const { data, error } = await db.from("tasks").select("*").order("created_at", { ascending: false });
+      if (error) {
+        app.innerHTML = `<section class="panel"><h2>Couldn’t load tasks</h2><p>${esc(error.message)}</p></section>`;
+        return;
+      }
+      tasks = data ?? [];
+      render();
+    }
+
+    async function addTask(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const taskData = {
+        task: form.task.value.trim(),
+        priority: form.priority.value,
+        status: form.status.value,
+        due_date: form.due_date.value || null,
+        category: form.category.value.trim() || null,
+        notes: form.notes.value.trim() || null
+      };
+      const { error } = await db.from("tasks").insert(taskData);
+      if (error) return notify(error.message, "error");
+      await loadTasks();
+    }
+
+    async function handleTaskAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const task = tasks.find(item => String(item.id) === button.dataset.id);
+      if (!task) return;
+      let result;
+      if (button.dataset.action === "delete") {
+        if (!confirm(`Delete "${task.task}"?`)) return;
+        result = await db.from("tasks").delete().eq("id", task.id);
+      } else {
+        result = await db.from("tasks").update({
+          status: task.status === "Done" ? "Not started" : "Done"
+        }).eq("id", task.id);
+      }
+      if (result.error) return alert(result.error.message);
+      await loadTasks();
+    }
+
+    if (SUPABASE_PUBLISHABLE_KEY.includes("PASTE_YOUR_")) {
+      app.innerHTML = '<section class="panel"><h2>Setup needed</h2><p>Open index.html in GitHub, edit the page, and replace the publishable key placeholder with your full key.</p></section>';
+    } else {
+      const { data: { session } } = await db.auth.getSession();
+      if (session) await loadTasks();
+      else showAuth();
+      db.auth.onAuthStateChange((_event, sessionNow) => {
+        if (sessionNow) setTimeout(loadTasks, 0);
+        else { tasks = []; showAuth(); }
+      });
+    }
+  </script>
 </body>
 </html>
